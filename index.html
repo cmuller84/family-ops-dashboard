@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Family Ops Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CRITICAL: DO NOT REMOVE/MODIFY THIS COMMENT OR THE SCRIPT BELOW -->
+    <script src="https://blink.new/auto-engineer.js?projectId=family-ops-dashboard-68kj0g31" type="module"></script>
+    <!-- Ensure toast containers are always visible above all layers -->
+    <style>
+      #react-hot-toast, .react-hot-toast {
+        position: fixed !important;
+        z-index: 2147483647 !important;
+        pointer-events: auto !important;
+        top: 12px !important;
+        right: 12px !important;
+        left: auto !important;
+        bottom: auto !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="toast-root"></div>
+    <div id="root"></div>
+    <script>
+      window.__toastMountLog = [];
+      window.__toastPing = (msg) => window.__toastMountLog.push({ t: Date.now(), msg });
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html> 
