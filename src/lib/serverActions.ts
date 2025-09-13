@@ -203,7 +203,6 @@ export const events = {
     const id = `event_${Date.now()}`
     await blink.db.events.create({ id, familyId, title, startTime: startISO, endTime: endISO || null, location: location || null, source: 'manual' })
     return id
-  }
   },
   async update(eventId: string, familyId: string, updates: { title?: string, startTime?: string, endTime?: string, location?: string }) {
     const user = await getUserOrDemo(); requireAuth(); await assertMembership(user.id, familyId)
@@ -220,6 +219,7 @@ export const events = {
     await blink.db.events.delete(eventId)
     toast.success('Event deleted')
     return { ok: true }
+  }
 }
 
 // Routines and RoutineLogs (adapters)
@@ -309,18 +309,11 @@ const toggleRoutineLog = async (routineId: string, completed: boolean, dateISO?:
     if (existing.length > 0 && existing[0].completed === '1') {
       await blink.db.routineLogs.update(existing[0].id, { completed: '0' })
       const newStreak = Math.max(0, current - 1)
-  async create(childId: string, title: string, schedule: any) {
-    const user = await getUserOrDemo(); requireAuth()
-    // Get the family from the child to check permissions
-    const child = (await blink.db.children.list({ where: { id: childId }, limit: 1 }))[0]
-    if (!child) throw new Error('Child not found')
-    await requireFamily(child.familyId)
-    const membership = await assertMembership(user.id, child.familyId)
-    if (membership.role === 'child') throw new Error('Only adults can create routines')
-    const id = `routine_${Date.now()}`
-    await blink.db.routines.create({ id, childId, title, scheduleJson: JSON.stringify(schedule), streakCount: '0' })
-    return id
-  },  }
+      await blink.db.routines.update(routineId, { streakCount: String(newStreak) })
+      return { completed: false, streak: newStreak }
+    }
+    return { completed: false, streak: current }
+  }
 }
 
 export const routines = {
@@ -346,7 +339,20 @@ export const routines = {
     toast.success('Routine updated')
     return { ok: true }
   },
-  async remove(routineId: string) {    const user = await getUserOrDemo(); requireAuth()
+  async create(childId: string, title: string, schedule: any) {
+    const user = await getUserOrDemo(); requireAuth()
+    // Get the family from the child to check permissions
+    const child = (await blink.db.children.list({ where: { id: childId }, limit: 1 }))[0]
+    if (!child) throw new Error('Child not found')
+    await requireFamily(child.familyId)
+    const membership = await assertMembership(user.id, child.familyId)
+    if (membership.role === 'child') throw new Error('Only adults can create routines')
+    const id = `routine_${Date.now()}`
+    await blink.db.routines.create({ id, childId, title, scheduleJson: JSON.stringify(schedule), streakCount: '0' })
+    return id
+  },
+  async remove(routineId: string) {
+    const user = await getUserOrDemo(); requireAuth()
     const routine = (await blink.db.routines.list({ where: { id: routineId }, limit: 1 }))[0]
     if (!routine) throw new Error('Routine not found')
     const child = (await blink.db.children.list({ where: { id: routine.childId }, limit: 1 }))[0]

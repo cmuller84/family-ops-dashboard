@@ -366,6 +366,7 @@ export function RoutinesPage() {
             {role === 'child'
               ? 'Complete your daily routines and build great habits!'
               : 'Manage daily routines for your children'}
+          </p>
         </div>
         {(role === 'owner' || role === 'adult') && (
           <Button
@@ -638,7 +639,9 @@ export function RoutinesPage() {
               >
                 {role === 'child' ? 'Ask an adult to create routines' : 'Create Your First Routine'}
               </Button>
-            )}        </Card>
+            )}
+          </CardContent>
+        </Card>
       )}
     </div>
   )
