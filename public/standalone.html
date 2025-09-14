@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Ops Dashboard - Test Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .tour-modal { animation: fadeIn 0.3s ease-out; }
+        .tour-content { animation: slideUp 0.3s ease-out; }
+        .progress-bar { width: 50%; background: #3b82f6; height: 8px; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Onboarding Tour Modal -->
+    <div id="tourModal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden tour-modal">
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg max-w-md w-full shadow-2xl border-2 border-blue-200 tour-content">
+                <button onclick="skipTour()" class="absolute right-4 top-4 text-gray-400 hover:text-gray-600">✕</button>
+                <div class="p-8 space-y-6">
+                    <!-- Step indicator -->
+                    <div id="stepIndicator" class="flex items-center justify-center space-x-2">
+                        <!-- Will be populated by JS -->
+                    </div>
+
+                    <!-- Icon -->
+                    <div id="tourIcon" class="flex justify-center text-6xl">✨</div>
+
+                    <!-- Content -->
+                    <div class="text-center space-y-3">
+                        <h2 id="tourTitle" class="text-2xl font-bold">Welcome to Your Family Command Center!</h2>
+                        <p id="tourDescription" class="text-gray-600 leading-relaxed">
+                            One dashboard to replace sticky notes, multiple apps, and morning chaos. Let's show you how it works.
+                        </p>
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="flex items-center justify-between pt-4">
+                        <button id="prevBtn" onclick="prevStep()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded invisible">
+                            ← Back
+                        </button>
+                        <button id="nextBtn" onclick="nextStep()" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            Next →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto p-6 space-y-6">
+        <div class="text-center space-y-4 mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">Family Ops Dashboard - Test Mode</h1>
+            <p class="text-xl text-gray-600">Testing onboarding tour and core features</p>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-blue-800 font-medium">
+                    🎯 The onboarding tour will auto-start in 2 seconds. This is a standalone test page.
+                </p>
+            </div>
+        </div>
+
+        <!-- Sample Dashboard Content -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+            <!-- This Week Card -->
+            <div class="md:col-span-2 bg-white rounded-lg shadow-sm border p-6" data-tour="calendar">
+                <div class="flex items-center space-x-2 mb-4">
+                    <span class="text-2xl">📅</span>
+                    <h3 class="text-lg font-semibold">This Week</h3>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-4">
+                        <div class="text-center min-w-[60px]">
+                            <p class="text-sm font-medium">Mon</p>
+                            <p class="text-xs text-gray-500">Sep 16</p>
+                        </div>
+                        <div>
+                            <p class="text-sm">Dentist appointment - 2:00 PM</p>
+                            <p class="text-sm">Soccer practice - 4:30 PM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tonight's Dinner -->
+            <div class="bg-white rounded-lg shadow-sm border p-6" data-tour="meals">
+                <div class="flex items-center space-x-2 mb-4">
+                    <span class="text-2xl">🍽️</span>
+                    <h3 class="text-lg font-semibold">Tonight's Dinner</h3>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-medium">Chicken Teriyaki</h4>
+                        <p class="text-sm text-gray-600">Quick and delicious</p>
+                    </div>
+                    <button class="w-full px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50">
+                        Swap Recipe
+                    </button>
+                </div>
+            </div>
+
+            <!-- Routines -->
+            <div class="bg-white rounded-lg shadow-sm border p-6" data-tour="routines">
+                <div class="flex items-center space-x-2 mb-4">
+                    <span class="text-2xl">⏰</span>
+                    <h3 class="text-lg font-semibold">Today's Routines</h3>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-medium">Morning Routine</h4>
+                            <span class="text-sm text-gray-500">Emma</span>
+                        </div>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-green-500">✓</span>
+                                <span class="line-through text-gray-500">Brush teeth</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-green-500">✓</span>
+                                <span class="line-through text-gray-500">Get dressed</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="border border-gray-300 w-4 h-4 rounded"></span>
+                                <span>Make bed</span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="progress-bar"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">2/4 complete • Streak: 3 days</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grocery List -->
+            <div class="bg-white rounded-lg shadow-sm border p-6" data-tour="groceries">
+                <div class="flex items-center space-x-2 mb-4">
+                    <span class="text-2xl">🛒</span>
+                    <h3 class="text-lg font-semibold">Grocery List</h3>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center space-x-2">
+                        <span class="border border-gray-300 w-4 h-4 rounded"></span>
+                        <span>Chicken breast</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-green-500">✓</span>
+                        <span class="line-through text-gray-500">Teriyaki sauce</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="border border-gray-300 w-4 h-4 rounded"></span>
+                        <span>Rice</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trips -->
+            <div class="bg-white rounded-lg shadow-sm border p-6" data-tour="trips">
+                <div class="flex items-center space-x-2 mb-4">
+                    <span class="text-2xl">📍</span>
+                    <h3 class="text-lg font-semibold">Upcoming Trip</h3>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-medium">Beach Vacation</h4>
+                        <p class="text-sm text-gray-600">San Diego, CA • Oct 15-20</p>
+                    </div>
+                    <button class="w-full px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50">
+                        + Create Packing List
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Status -->
+        <div class="bg-white rounded-lg shadow-sm border p-6 mt-8">
+            <h3 class="text-lg font-semibold mb-4">Testing Status</h3>
+            <div class="space-y-2 text-sm">
+                <p>✅ Standalone HTML page loaded successfully</p>
+                <p>🎯 Onboarding tour should auto-start (watch for modal)</p>
+                <p>📱 All tour data-tour attributes are in place</p>
+                <p>🚀 No authentication or JavaScript frameworks required</p>
+                <p class="text-gray-600 mt-4">
+                    If you can see this page, the deployment is working. The tour should appear automatically.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const steps = [
+            {
+                title: "Welcome to Your Family Command Center!",
+                description: "One dashboard to replace sticky notes, multiple apps, and morning chaos. Let's show you how it works.",
+                icon: "✨"
+            },
+            {
+                title: "Morning Chaos? Solved.",
+                description: "Kids check off their own morning routines. No more nagging. Watch streaks build as good habits form.",
+                icon: "⏰"
+            },
+            {
+                title: "Dinner Stress? Gone.",
+                description: "AI plans your week's meals in seconds. Swap recipes with one click. Never hear 'what's for dinner?' at 5pm again.",
+                icon: "🍽️"
+            },
+            {
+                title: "Grocery Trips? Optimized.",
+                description: "Meal ingredients auto-add to your list. Items merge automatically. Shop once, eat all week.",
+                icon: "🛒"
+            },
+            {
+                title: "Packing? Automated.",
+                description: "AI generates packing lists based on your destination. Never forget swim goggles or phone chargers again.",
+                icon: "📍"
+            },
+            {
+                title: "Save 5+ Hours Every Week",
+                description: "That's 260 hours a year. Time for what matters: being together, not coordinating logistics.",
+                icon: "🎯"
+            }
+        ];
+
+        function startTour() {
+            document.getElementById('tourModal').classList.remove('hidden');
+            updateTourStep();
+        }
+
+        function updateTourStep() {
+            const step = steps[currentStep];
+            document.getElementById('tourTitle').textContent = step.title;
+            document.getElementById('tourDescription').textContent = step.description;
+            document.getElementById('tourIcon').textContent = step.icon;
+
+            // Update step indicator
+            const indicator = document.getElementById('stepIndicator');
+            indicator.innerHTML = '';
+            for (let i = 0; i < steps.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = `h-2 rounded-full transition-all ${
+                    i === currentStep ? 'w-8 bg-blue-600' :
+                    i < currentStep ? 'w-2 bg-blue-300' : 'w-2 bg-gray-300'
+                }`;
+                indicator.appendChild(dot);
+            }
+
+            // Update buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            prevBtn.classList.toggle('invisible', currentStep === 0);
+            nextBtn.textContent = currentStep === steps.length - 1 ? 'Get Started!' : 'Next →';
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateTourStep();
+            } else {
+                skipTour();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateTourStep();
+            }
+        }
+
+        function skipTour() {
+            document.getElementById('tourModal').classList.add('hidden');
+        }
+
+        // Auto-start tour after 2 seconds
+        setTimeout(startTour, 2000);
+    </script>
+</body>
+</html>
