@@ -13,6 +13,7 @@ import { ListPage } from './pages/ListPage'
 import ListsIndexPage from './pages/ListsIndexPage'
 import QAHarnessPage from './pages/QAHarnessPage'
 import DebugPage from './pages/DebugPage'
+import { TestPage } from './pages/TestPage'
 import { FamilyProvider, useFamily } from './lib/familyContext'
 import type { User } from './types'
 import { qaAuthBypassEnabled, featuresForcePro } from './lib/features'
@@ -122,6 +123,7 @@ function AppContent() {
           <Route path="/lists" element={<ListsIndexPage />} />
           <Route path="/lists/:listId" element={<ListPage />} />
           <Route path="/qa" element={<QAHarnessPage />} />
+          <Route path="/test" element={<TestPage />} />
           <Route path="/debug" element={<DebugPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

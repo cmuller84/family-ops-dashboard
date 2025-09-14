@@ -37,4 +37,4 @@ export function qaAuthBypassEnabled(): boolean {
     if (params.get('qaBypass') === '1') return true
   } catch { /* ignore */ }
   return false
-}
+}// Cache bust: Sun Sep 14 12:41:38 EDT 2025
