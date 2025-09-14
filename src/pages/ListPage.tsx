@@ -220,8 +220,9 @@ export function ListPage() {
           
           const result = await listItems.reorder(listId!, reorderData)
           
+          console.log('Reorder result:', result)
           if (result.ok) {
-            toast.success('Order saved!')
+            toast.success('Order saved! Items rearranged successfully.')
             console.log(`Successfully reordered ${result.updated}/${result.total} items`)
             
             // Update local state with correct positions to ensure persistence

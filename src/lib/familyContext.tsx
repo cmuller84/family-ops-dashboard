@@ -58,7 +58,9 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
           setRole(membership[0]?.role || null)
         } catch (roleError) {
           console.warn('Failed to get user role, using default:', roleError)
-          setRole('member') // Default fallback role
+          // In demo/QA mode, default to adult for testing all features
+          const isDemo = qaAuthBypassEnabled() || featuresForcePro()
+          setRole(isDemo ? 'adult' : 'member') // Demo gets adult role
         }
         
         // Check subscription status with Pro bypass

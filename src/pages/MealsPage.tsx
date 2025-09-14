@@ -117,6 +117,10 @@ export function MealsPage() {
 
     setGeneratingPlan(true)
     incrementUsage() // Track usage
+
+    // Show progress toast
+    toast('🤖 AI is planning your week\'s meals... This takes 10-15 seconds.')
+
     try {
       console.log('Starting AI meal plan generation...')
       const result = await meals.generateWeek(family.id, { weekStart, dietPrefs: preferences })
@@ -133,7 +137,8 @@ export function MealsPage() {
         if (result.listId) {
           setGroceryListId(result.listId)
         }
-        toast.success(`AI meal plan ready: ${mealsCreated + mealsUpdated} meals (${mealsCreated} new, ${mealsUpdated} updated) • ${itemsCreated} grocery items`)
+        // Show success with longer duration and clearer message
+        toast.success(`✨ AI Meal Plan Complete! Generated ${mealsCreated + mealsUpdated} meals and ${itemsCreated} grocery items. Check your updated weekly plan below!`)
       } else {
         console.error('Meal plan generation failed:', result)
         toast.error('Failed to generate meal plan - please try again')
