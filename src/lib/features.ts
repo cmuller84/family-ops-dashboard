@@ -1,7 +1,7 @@
 export function featuresForcePro(): boolean {
-  // Default: do NOT force Pro. Enable only via env or explicit URL param.
-  const TEMP_DISABLE_PRO = false
-  if (TEMP_DISABLE_PRO) return true
+  // TEMPORARY: Enable Pro features for all users during testing phase
+  const TEMP_ENABLE_PRO = true
+  if (TEMP_ENABLE_PRO) return true
 
   // Server-side env flags
   if ((globalThis as any)?.process?.env?.FEATURES_FORCE_PRO === 'true') return true;
@@ -17,12 +17,13 @@ export function featuresForcePro(): boolean {
   return false;
 }
 
-// TEMPORARY: Allow QA to access Meals and Trips without auth
-// This returns true for:
-// - /qa routes
-// - Any route with ?qaDemo=1
-// - /meals, /trips, and /lists routes (temporary until demo owner account is provided)
+// TEMPORARY: Allow QA to access all routes without auth during testing
+// This returns true for testing purposes
 export function qaAuthBypassEnabled(): boolean {
+  // TEMPORARY: Always allow QA access during testing phase
+  const TEMP_ALLOW_QA = true
+  if (TEMP_ALLOW_QA) return true
+
   if (typeof window === 'undefined') return false
   try {
     const params = new URLSearchParams(window.location.search)
