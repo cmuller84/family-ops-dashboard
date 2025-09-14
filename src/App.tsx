@@ -14,6 +14,7 @@ import ListsIndexPage from './pages/ListsIndexPage'
 import QAHarnessPage from './pages/QAHarnessPage'
 import DebugPage from './pages/DebugPage'
 import { TestPage } from './pages/TestPage'
+import { StandaloneTestPage } from './pages/StandaloneTestPage'
 import { FamilyProvider, useFamily } from './lib/familyContext'
 import type { User } from './types'
 import { qaAuthBypassEnabled, featuresForcePro } from './lib/features'
@@ -133,6 +134,16 @@ function AppContent() {
 }
 
 function App() {
+  // Check if we're on the standalone test route - bypass everything
+  if (typeof window !== 'undefined' && window.location.pathname === '/standalone') {
+    return (
+      <>
+        <StandaloneTestPage />
+        <ToastPortal />
+      </>
+    )
+  }
+
   return (
     <FamilyProvider>
       <>
