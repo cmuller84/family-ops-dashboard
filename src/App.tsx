@@ -20,6 +20,7 @@ import { qaAuthBypassEnabled, featuresForcePro } from './lib/features'
 import notify from '@/lib/notify'
 import { Toaster as RHTToaster, toast as rht } from 'react-hot-toast'
 import { createPortal } from 'react-dom'
+import { OnboardingTour } from './components/OnboardingTour'
 
 function ToastPortal() {
   useEffect(() => {
@@ -102,6 +103,7 @@ function AppContent() {
   return (
     <Router>
       <AppLayout>
+        <OnboardingTour />
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/calendar" element={<CalendarPage />} />

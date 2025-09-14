@@ -10,12 +10,12 @@ interface SidebarProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', icon: Home, path: '/' },
-  { name: 'Calendar', icon: Calendar, path: '/calendar' },
-  { name: 'Meals', icon: UtensilsCrossed, path: '/meals' },
-  { name: 'Trips & Lists', icon: MapPin, path: '/trips' },
-  { name: 'Routines', icon: Clock, path: '/routines' },
-  { name: 'Settings', icon: Settings, path: '/settings' },
+  { name: 'Dashboard', icon: Home, path: '/', tourId: 'dashboard' },
+  { name: 'Calendar', icon: Calendar, path: '/calendar', tourId: 'calendar' },
+  { name: 'Meals', icon: UtensilsCrossed, path: '/meals', tourId: 'meals' },
+  { name: 'Trips & Lists', icon: MapPin, path: '/trips', tourId: 'trips' },
+  { name: 'Routines', icon: Clock, path: '/routines', tourId: 'routines' },
+  { name: 'Settings', icon: Settings, path: '/settings', tourId: 'settings' },
 ]
 
 export function Sidebar({ isCollapsed = false, className, onClose }: SidebarProps) {
@@ -54,6 +54,7 @@ export function Sidebar({ isCollapsed = false, className, onClose }: SidebarProp
           return (
             <button
               key={item.path}
+              data-tour={item.tourId}
               onClick={() => {
                 navigate(item.path)
                 onClose?.()

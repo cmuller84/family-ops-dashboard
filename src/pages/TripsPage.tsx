@@ -26,13 +26,26 @@ export function TripsPage() {
   })
 
   const loadData = React.useCallback(async () => {
-    if (!familyId) return
-    
+    if (!familyId) {
+      console.log('[TripsPage] No familyId, skipping load')
+      setLoading(false)
+      return
+    }
+
+    console.log('[TripsPage] Loading data for family:', familyId)
+
     try {
       setLoading(true)
-      
-      // Load packing lists
-      const packingListsData = await lists.listByFamily(familyId, 'packing')
+
+      // Load packing lists with error handling
+      let packingListsData = []
+      try {
+        packingListsData = await lists.listByFamily(familyId, 'packing')
+        console.log('[TripsPage] Loaded packing lists:', packingListsData.length)
+      } catch (listError) {
+        console.error('[TripsPage] Error loading packing lists:', listError)
+        packingListsData = []
+      }
       
       // Remove duplicates by ID and title (prevent duplicate cards)
       const seenIds = new Set<string>()
@@ -49,15 +62,21 @@ export function TripsPage() {
       })
       
       setPackingLists(uniqueLists)
-      
-      // Load upcoming events that might be trips
-      const eventsData = await events.list(familyId)
-      const tripKeywords = ['trip', 'vacation', 'travel', 'flight', 'hotel', 'cruise', 'conference']
-      const tripEvents = eventsData.filter(event => {
-        const eventText = `${event.title} ${event.location || ''}`.toLowerCase()
-        return tripKeywords.some(keyword => eventText.includes(keyword))
-      })
-      setUpcomingTrips(tripEvents)
+
+      // Load upcoming events that might be trips (with error handling)
+      try {
+        const eventsData = await events.list(familyId)
+        const tripKeywords = ['trip', 'vacation', 'travel', 'flight', 'hotel', 'cruise', 'conference']
+        const tripEvents = eventsData.filter(event => {
+          const eventText = `${event.title} ${event.location || ''}`.toLowerCase()
+          return tripKeywords.some(keyword => eventText.includes(keyword))
+        })
+        setUpcomingTrips(tripEvents)
+        console.log('[TripsPage] Loaded trip events:', tripEvents.length)
+      } catch (eventError) {
+        console.error('[TripsPage] Error loading events:', eventError)
+        setUpcomingTrips([])
+      }
     } catch (error) {
       console.error('Failed to load trips data:', error)
       toast.error('Failed to load data')
