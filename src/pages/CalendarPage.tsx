@@ -81,12 +81,20 @@ export function CalendarPage() {
     if (!editingEvent || !familyId) return
 
     try {
-      // Create local date objects and convert to ISO string properly
-      const startLocal = new Date(`${eventForm.startDate}T${eventForm.startTime}:00`)
+      // Parse the date and time correctly, preserving local time
+      // The form values are already in local time, so we need to ensure they stay that way
+      const [startYear, startMonth, startDay] = eventForm.startDate.split('-').map(Number)
+      const [startHour, startMinute] = eventForm.startTime.split(':').map(Number)
+      const startLocal = new Date(startYear, startMonth - 1, startDay, startHour, startMinute)
       const startDateTime = startLocal.toISOString()
 
-      const endDateTime = eventForm.endDate && eventForm.endTime ?
-        new Date(`${eventForm.endDate}T${eventForm.endTime}:00`).toISOString() : undefined
+      let endDateTime: string | undefined = undefined
+      if (eventForm.endDate && eventForm.endTime) {
+        const [endYear, endMonth, endDay] = eventForm.endDate.split('-').map(Number)
+        const [endHour, endMinute] = eventForm.endTime.split(':').map(Number)
+        const endLocal = new Date(endYear, endMonth - 1, endDay, endHour, endMinute)
+        endDateTime = endLocal.toISOString()
+      }
 
       await events.update(editingEvent.id, familyId, {
         title: eventForm.title,

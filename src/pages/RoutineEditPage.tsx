@@ -48,29 +48,62 @@ export default function RoutineEditPage() {
   useEffect(() => {
     const load = async () => {
       if (!routineId) return
-      try {
-        setLoading(true)
-        const r = (await blink.db.routines.list({ where: { id: routineId }, limit: 1 }))[0]
-        if (!r) throw new Error('Routine not found')
-        setTitle(r.title || '')
-        let schedule: Schedule = {}
-        try { schedule = JSON.parse(r.scheduleJson || '{}') } catch { /* ignore */ }
-        if (schedule?.time) setTime(String(schedule.time))
-        if (Array.isArray(schedule?.days)) setDays(schedule.days as string[])
-        if (Array.isArray(schedule?.tasks) && schedule.tasks.length) setTasks(schedule.tasks as string[])
-        // Load child name (optional)
+
+      let retryCount = 0
+      const maxRetries = 3
+
+      while (retryCount < maxRetries) {
         try {
-          const ch = (await blink.db.children.list({ where: { id: r.childId }, limit: 1 }))[0]
-          setChildName(ch?.name || '')
-        } catch { /* ignore */ }
-      } catch (e: any) {
-        toast.error(e?.message || 'Failed to load routine')
-      } finally {
-        setLoading(false)
+          setLoading(true)
+
+          // Add a small delay for retries
+          if (retryCount > 0) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount))
+          }
+
+          const r = (await blink.db.routines.list({ where: { id: routineId }, limit: 1 }))[0]
+          if (!r) {
+            // If not found, don't retry - it genuinely doesn't exist
+            throw new Error('Routine not found')
+          }
+
+          setTitle(r.title || '')
+          let schedule: Schedule = {}
+          try { schedule = JSON.parse(r.scheduleJson || '{}') } catch { /* ignore */ }
+          if (schedule?.time) setTime(String(schedule.time))
+          if (Array.isArray(schedule?.days)) setDays(schedule.days as string[])
+          if (Array.isArray(schedule?.tasks) && schedule.tasks.length) setTasks(schedule.tasks as string[])
+
+          // Load child name (optional)
+          try {
+            const ch = (await blink.db.children.list({ where: { id: r.childId }, limit: 1 }))[0]
+            setChildName(ch?.name || '')
+          } catch { /* ignore */ }
+
+          // Success - exit the retry loop
+          break
+        } catch (e: any) {
+          retryCount++
+
+          // Check if it's a network error and we should retry
+          const isNetworkError = e?.message?.includes('fetch') || e?.message?.includes('network') || e?.message?.includes('Network')
+
+          if (retryCount >= maxRetries || !isNetworkError) {
+            console.error('Failed to load routine after retries:', e)
+            toast.error(e?.message || 'Failed to load routine')
+            // Navigate back on error
+            setTimeout(() => navigate('/routines'), 2000)
+            break
+          }
+        } finally {
+          if (retryCount >= maxRetries || retryCount === 0) {
+            setLoading(false)
+          }
+        }
       }
     }
     load()
-  }, [routineId])
+  }, [routineId, navigate])
 
   const toggleDay = (d: string) => {
     setDays(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])
