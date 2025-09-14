@@ -9,6 +9,7 @@ import blink from '@/blink/client'
 import type { Meal } from '@/types'
 import toast from '@/lib/notify'
 import { featuresForcePro } from '@/lib/features'
+import { checkRateLimit, incrementUsage } from '@/lib/rateLimiter'
 
 interface MealPlan {
   meals: Array<{
@@ -99,15 +100,23 @@ export function MealsPage() {
       toast.error('No family found')
       return
     }
-    
+
+    // Check rate limit first
+    const rateCheck = checkRateLimit()
+    if (!rateCheck.allowed) {
+      toast.error(rateCheck.message || 'Rate limit exceeded')
+      return
+    }
+
     // Check Pro status with bypass
     const hasProAccess = isSubscribed || requireProBypass()
     if (!hasProAccess) {
       setShowPaywall(true)
       return
     }
-    
+
     setGeneratingPlan(true)
+    incrementUsage() // Track usage
     try {
       console.log('Starting AI meal plan generation...')
       const result = await meals.generateWeek(family.id, { weekStart, dietPrefs: preferences })
