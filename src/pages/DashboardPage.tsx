@@ -111,7 +111,7 @@ function AddToGroceryListButton({ meal, familyId }: { meal: any; familyId?: stri
 
 export function DashboardPage() {
   const navigate = useNavigate()
-  const { familyId, user } = useFamily()
+  const { familyId, user, loading: familyLoading } = useFamily()
   const [loading, setLoading] = useState(true)
   const [loadingRef, setLoadingRef] = useState(false)
   const [lastLoadTime, setLastLoadTime] = useState(0)
@@ -132,7 +132,14 @@ export function DashboardPage() {
   const loadDashboardDataRef = React.useRef<() => Promise<void> | null>(null)
 
   useEffect(() => {
-    if (!familyId || loadingRef) return
+    // Skip if family is still loading or no familyId yet
+    if (familyLoading || !familyId || loadingRef) {
+      // If family finished loading but no familyId, show empty state
+      if (!familyLoading && !familyId) {
+        setLoading(false)
+      }
+      return
+    }
 
     let cancelled = false
 
@@ -234,7 +241,7 @@ export function DashboardPage() {
       cancelled = true
       loadDashboardDataRef.current = null
     }
-  }, [familyId, weekStart])
+  }, [familyId, familyLoading, weekStart])
 
   // Add in-flight tracking to prevent routine toggle race conditions
   const inFlight = React.useRef<Record<string, boolean>>({})
@@ -320,10 +327,26 @@ export function DashboardPage() {
     })) || []
   }).slice(0, 4)
 
-  if (loading) {
+  // Show spinner only while family context is loading
+  if (familyLoading || (loading && familyId)) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    )
+  }
+
+  // If no family after loading, show welcome message
+  if (!familyLoading && !familyId) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-semibold">Welcome!</h2>
+          <p className="text-muted-foreground">Setting up your family dashboard...</p>
+          <Button onClick={() => window.location.reload()}>
+            Refresh Page
+          </Button>
+        </div>
       </div>
     )
   }

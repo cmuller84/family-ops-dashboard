@@ -10,7 +10,7 @@ import toast from '@/lib/notify'
 import { featuresForcePro } from '@/lib/features'
 
 export function TripsPage() {
-  const { family, familyId, isSubscribed } = useFamily()
+  const { family, familyId, isSubscribed, loading: familyLoading } = useFamily()
   const navigate = useNavigate()
   const [packingLists, setPackingLists] = useState<ListType[]>([])
   const [upcomingTrips, setUpcomingTrips] = useState<Event[]>([])
@@ -74,16 +74,16 @@ export function TripsPage() {
 
   const createBasicPackingList = async () => {
     if (!familyId || creatingList === 'basic') return
-    
+
     setCreatingList('basic')
     try {
       // Generate unique title by checking existing titles and adding counter if needed
       const existingLists = await lists.listByFamily(familyId, 'packing')
       const baseTitle = `Packing List • ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-      
+
       let title = baseTitle
       let counter = 1
-      
+
       while (existingLists.find(list =>
         list.title.toLowerCase().trim() === title.toLowerCase().trim()
       )) {
@@ -91,7 +91,7 @@ export function TripsPage() {
         title = `${baseTitle} (${counter})`
       }
       const result = await lists.createBasicPacking(familyId, title)
-      
+
       if (result.ok) {
         toast.success('Basic packing list created!')
         if ('listId' in result) {
@@ -105,19 +105,13 @@ export function TripsPage() {
       console.error('Failed to create basic packing list:', error)
       toast.error('Failed to create packing list')
     } finally {
-        // Generate unique fallback title
-        const existingLists = await lists.listByFamily(family.id, 'packing')
-        let fallbackTitle = `Packing List • ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-        let counter = 1
-        
-        while (existingLists.find(list =>
-          list.title.toLowerCase().trim() === fallbackTitle.toLowerCase().trim()
-        )) {
-          counter++
-          fallbackTitle = `Packing List • ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} (${counter})`
-        }
-        
-        const fallback = await lists.createBasicPacking(family.id, fallbackTitle)    
+      setCreatingList(null)
+    }
+  }
+
+  const createAIPackingList = async () => {
+    if (!family || !familyId || creatingList === 'ai') return
+
     // Check Pro access
     const hasProAccess = isSubscribed || featuresForcePro()
     if (!hasProAccess) {
@@ -127,22 +121,22 @@ export function TripsPage() {
 
     // Destination optional in QA; default to generic when empty
     // Dates optional; server defaults when missing
-    
+
     setCreatingList('ai')
     try {
       const tripData = {
         destination: tripForm.destination.trim() || 'Trip',
         startDate: tripForm.startDate || undefined,
         endDate: tripForm.endDate || undefined,
-        travelers: Array.from({ length: tripForm.travelers }, (_, i) => ({ 
-          name: `Traveler ${i + 1}`, 
-          age: 'adult' 
+        travelers: Array.from({ length: tripForm.travelers }, (_, i) => ({
+          name: `Traveler ${i + 1}`,
+          age: 'adult'
         })),
         tripType: tripForm.tripType
       }
-      
-      const result = await lists.createPackingFromTrip(family.id, { trip: tripData })
-      
+
+      const result = await lists.createPackingFromTrip(familyId, { trip: tripData })
+
       if (result.ok) {
         const count = Number((result as any).itemsCreated || 0)
         // Toast moved to serverActions.ts
@@ -157,41 +151,39 @@ export function TripsPage() {
           travelers: 2,
           tripType: 'vacation'
         })
+        await loadData() // Refresh the list
       } else {
         toast.error('Failed to create AI packing list')
       }
     } catch (error) {
       console.error('Failed to create AI packing list:', error)
-      try {
-        // Fallback: create a basic packing list so QA can proceed
-        const fallbackTitle = `Packing List • ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-        const fallback = await lists.createBasicPacking(family.id, fallbackTitle)
-        if (fallback.ok) {
-          toast.success('AI unavailable — created a basic packing list')
-          if ('listId' in fallback) {
-            navigate(`/lists/${(fallback as any).listId}`)
-          }
-          setShowTripForm(false)
-        } else {
-          if ((error as any)?.message?.includes('Pro subscription required')) {
-            toast('AI packing lists require Pro subscription')
-          } else {
-            toast.error('Failed to create AI packing list')
-          }
-        }
-      } catch (fallbackError) {
-        console.error('Fallback packing list creation failed:', fallbackError)
-        toast.error('Failed to create packing list')
-      }
+      toast.error('Failed to create AI packing list')
     } finally {
       setCreatingList(null)
     }
   }
 
-  if (loading) {
+  // Show loading spinner only while family context is loading
+  if (familyLoading || (loading && familyId)) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    )
+  }
+
+  // If no family after loading, show empty state
+  if (!familyLoading && !familyId) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center space-y-4">
+          <MapPin className="w-12 h-12 text-muted-foreground mx-auto" />
+          <h2 className="text-2xl font-semibold">No Trips Yet</h2>
+          <p className="text-muted-foreground">Create your first packing list to get started</p>
+          <Button onClick={() => window.location.reload()}>
+            Refresh Page
+          </Button>
+        </div>
       </div>
     )
   }
