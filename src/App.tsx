@@ -66,8 +66,15 @@ function AppContent() {
   const path = typeof window !== 'undefined' ? window.location.pathname : ''
   const allowPublic = isQABypass || featuresForcePro() || path.startsWith('/qa') || path.startsWith('/meals') || path.startsWith('/trips') || path.startsWith('/lists')
 
+  // For QA testing: also check URL params directly here as fallback
+  const hasQAParam = typeof window !== 'undefined' && (
+    window.location.search.includes('qaDemo=1') ||
+    window.location.search.includes('qaBypass=1') ||
+    window.location.search.includes('qaPro=1')
+  )
+
   // Require sign-in for member areas unless QA demo mode or public-allowed route
-  if (!user && !allowPublic) {
+  if (!user && !allowPublic && !hasQAParam) {
     const handleSignIn = () => {
       const redirect = window.location.href
       blink.auth.login(redirect)
@@ -87,7 +94,7 @@ function AppContent() {
   if (!familyId && typeof window !== 'undefined') {
     const bypass = qaAuthBypassEnabled() || featuresForcePro()
     const isQADemo = window.location.pathname.startsWith('/qa') || new URLSearchParams(window.location.search).get('qaDemo') === '1'
-    if (!bypass && !isQADemo) {
+    if (!bypass && !isQADemo && !hasQAParam) {
       return (
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="text-center">
