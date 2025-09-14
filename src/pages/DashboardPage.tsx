@@ -234,7 +234,7 @@ export function DashboardPage() {
       cancelled = true
       loadDashboardDataRef.current = null
     }
-  }, [familyId, weekStart, loadingRef])
+  }, [familyId, weekStart])
 
   // Add in-flight tracking to prevent routine toggle race conditions
   const inFlight = React.useRef<Record<string, boolean>>({})

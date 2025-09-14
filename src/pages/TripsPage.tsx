@@ -26,13 +26,13 @@ export function TripsPage() {
   })
 
   const loadData = React.useCallback(async () => {
-    if (!family) return
+    if (!familyId) return
     
     try {
       setLoading(true)
       
       // Load packing lists
-      const packingListsData = await lists.listByFamily(family.id, 'packing')
+      const packingListsData = await lists.listByFamily(familyId, 'packing')
       
       // Remove duplicates by ID and title (prevent duplicate cards)
       const seenIds = new Set<string>()
@@ -51,7 +51,7 @@ export function TripsPage() {
       setPackingLists(uniqueLists)
       
       // Load upcoming events that might be trips
-      const eventsData = await events.list(family.id)
+      const eventsData = await events.list(familyId)
       const tripKeywords = ['trip', 'vacation', 'travel', 'flight', 'hotel', 'cruise', 'conference']
       const tripEvents = eventsData.filter(event => {
         const eventText = `${event.title} ${event.location || ''}`.toLowerCase()
@@ -64,21 +64,21 @@ export function TripsPage() {
     } finally {
       setLoading(false)
     }
-  }, [family])
+  }, [familyId])
 
   useEffect(() => {
-    if (family) {
+    if (familyId) {
       loadData()
     }
-  }, [loadData, family])
+  }, [loadData, familyId])
 
   const createBasicPackingList = async () => {
-    if (!family || creatingList === 'basic') return
+    if (!familyId || creatingList === 'basic') return
     
     setCreatingList('basic')
     try {
       // Generate unique title by checking existing titles and adding counter if needed
-      const existingLists = await lists.listByFamily(family.id, 'packing')
+      const existingLists = await lists.listByFamily(familyId, 'packing')
       const baseTitle = `Packing List • ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
       
       let title = baseTitle
@@ -89,8 +89,8 @@ export function TripsPage() {
       )) {
         counter++
         title = `${baseTitle} (${counter})`
-      }      
-      const result = await lists.createBasicPacking(family.id, title)
+      }
+      const result = await lists.createBasicPacking(familyId, title)
       
       if (result.ok) {
         toast.success('Basic packing list created!')

@@ -51,12 +51,27 @@ export function CalendarPage() {
     setEditingEvent(event)
     const startDate = new Date(event.startTime)
     const endDate = event.endTime ? new Date(event.endTime) : startDate
+
+    // Format date and time for form inputs (using local time zone)
+    const formatDateForInput = (date: Date) => {
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+
+    const formatTimeForInput = (date: Date) => {
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      return `${hours}:${minutes}`
+    }
+
     setEventForm({
       title: event.title,
-      startDate: startDate.toISOString().split('T')[0],
-      startTime: startDate.toTimeString().slice(0, 5),
-      endDate: endDate.toISOString().split('T')[0],
-      endTime: endDate.toTimeString().slice(0, 5),
+      startDate: formatDateForInput(startDate),
+      startTime: formatTimeForInput(startDate),
+      endDate: formatDateForInput(endDate),
+      endTime: formatTimeForInput(endDate),
       location: event.location || ''
     })
     setShowEditModal(true)
@@ -66,9 +81,12 @@ export function CalendarPage() {
     if (!editingEvent || !familyId) return
 
     try {
-      const startDateTime = `${eventForm.startDate}T${eventForm.startTime}:00.000Z`
+      // Create local date objects and convert to ISO string properly
+      const startLocal = new Date(`${eventForm.startDate}T${eventForm.startTime}:00`)
+      const startDateTime = startLocal.toISOString()
+
       const endDateTime = eventForm.endDate && eventForm.endTime ?
-        `${eventForm.endDate}T${eventForm.endTime}:00.000Z` : undefined
+        new Date(`${eventForm.endDate}T${eventForm.endTime}:00`).toISOString() : undefined
 
       await events.update(editingEvent.id, familyId, {
         title: eventForm.title,
