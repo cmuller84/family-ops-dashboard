@@ -36,6 +36,12 @@ function ToastPortal() {
 function AppContent() {
   const { user, loading, familyId } = useFamily()
 
+  // DEBUG: Force bypass for testing - TEMPORARY
+  const FORCE_TESTING_BYPASS = true
+  if (FORCE_TESTING_BYPASS) {
+    console.log('[DEBUG] Forcing testing bypass - no auth required')
+  }
+
   // Toast diagnostics: debug param and startup smoke toast once per tab
   useEffect(() => {
     try {
@@ -75,8 +81,12 @@ function AppContent() {
     window.location.search.includes('qaPro=1')
   )
 
+  // DEBUG: Skip auth check entirely if force bypass is enabled
+  if (FORCE_TESTING_BYPASS) {
+    // Skip all authentication - proceed directly to app
+  }
   // Require sign-in for member areas unless QA demo mode or public-allowed route
-  if (!user && !allowPublic && !hasQAParam) {
+  else if (!user && !allowPublic && !hasQAParam) {
     const handleSignIn = () => {
       const redirect = window.location.href
       blink.auth.login(redirect)
@@ -93,7 +103,7 @@ function AppContent() {
     )
   }
 
-  if (!familyId && typeof window !== 'undefined') {
+  if (!familyId && typeof window !== 'undefined' && !FORCE_TESTING_BYPASS) {
     const bypass = qaAuthBypassEnabled() || featuresForcePro()
     const isQADemo = window.location.pathname.startsWith('/qa') || new URLSearchParams(window.location.search).get('qaDemo') === '1'
     if (!bypass && !isQADemo && !hasQAParam) {
